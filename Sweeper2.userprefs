@@ -1,0 +1,24 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\MapGeneration\Scripts\LevelGenerator_tempInput.cs">
+    <Files>
+      <File FileName="Assets\MapGeneration\Scripts\LevelGenerator_tempInput.cs" Line="38" Column="50" />
+      <File FileName="Assets\MapGeneration\Scripts\GameobjectArray.cs" Line="27" Column="5" />
+      <File FileName="Assets\MapGeneration\Scripts\NextPositionObject.cs" Line="1" Column="1" />
+      <File FileName="Assets\MapGeneration\Scripts\NextPosition.cs" Line="1" Column="1" />
+      <File FileName="Assets\MapGeneration\Scripts\PopulateMap.cs" Line="20" Column="136" />
+      <File FileName="Assets\MapGeneration\Scripts\BreadCrumbsObject.cs" Line="1" Column="1" />
+      <File FileName="Assets\MapGeneration\Scripts\CounterObject.cs" Line="1" Column="1" />
+      <File FileName="Assets\MapGeneration\Scripts\TypeObject.cs" Line="1" Column="1" />
+      <File FileName="Assets\MapGeneration\Scripts\Touched.cs" Line="13" Column="3" />
+      <File FileName="Assets\MapGeneration\Scripts\Type.cs" Line="5" Column="73" />
+      <File FileName="Assets\MapGeneration\Scripts\Orientation.cs" Line="1" Column="1" />
+      <File FileName="Assets\MapGeneration\Scripts\Teleporter.cs" Line="5" Column="13" />
+      <File FileName="Assets\MapGeneration\Scripts\Counter.cs" Line="18" Column="76" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
