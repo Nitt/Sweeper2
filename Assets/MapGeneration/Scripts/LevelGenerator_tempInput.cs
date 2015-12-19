@@ -3,20 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class LevelGenerator_tempInput : MonoBehaviour {
+	public int mapSeed;
+	public float buildSpeed;
     public GameObject map;
+	[HideInInspector]
 	public bool CanStartCoroutine;
 	private GameObject currentCell, nextCell, nextNextCell, startCell;
-	private int steps;
-	private int difficulty;
+	private int difficulty, steps, teleporterCount;
 	private int temporaryTeleporterPosition;
 	private bool goingIntoTeleporter, CanTestStart;
 	private int inc;
+	private int seedCounter = 0;
 
 	// Use this for initialization
 	void Start () {
 		CanStartCoroutine = true;
 		steps = 0;
 		difficulty = 0;
+		teleporterCount = 10;
+		seedCounter = 0;
 		inc = 0;
 		goingIntoTeleporter = false;
 	}
@@ -33,21 +38,33 @@ public class LevelGenerator_tempInput : MonoBehaviour {
 
 	IEnumerator GenerateLevel(){
 		// variable declaration:
+		mapSeed++;
 		GameobjectArray mapCellArray =  map.GetComponent<GameobjectArray>();
 		StartPositions startPositions = map.GetComponent<StartPositions> ();
-		int StartPos = mapCellArray.GetRandom ();
+		seedCounter = mapSeed;
+
+
 
 		// clear counters:
 		steps = 0;
 		difficulty = 0;
+		teleporterCount = 10;
+
 
 		// clear and populate map array:
 		mapCellArray.Clear();
 //		map.GetComponent<PopulateMap>().populate(Random.Range(5,13), Random.Range(5,13));
 //		map.GetComponent<PopulateMap>().populate(12, 20, true);
-		map.GetComponent<PopulateMap>().populate(9, 16, true);
-//		map.GetComponent<PopulateMap>().populate(2, 2, true);
+//		map.GetComponent<PopulateMap>().populate(9, 16, true);
+		map.GetComponent<PopulateMap>().populate(16, 9, false);
+//		map.GetComponent<PopulateMap>().populate(6, 12, true);
+//		map.GetComponent<PopulateMap>().populate(3, 3, true);
 		yield return null;
+
+		Random.seed = seedCounter;
+		seedCounter++;
+		Debug.Log ("startrandom:" + Random.value);
+		int StartPos = mapCellArray.GetRandom(seedCounter);
 
 		// place a random startposition:
 		startPositions.NewPositions.Add(StartPos);
@@ -67,51 +84,70 @@ public class LevelGenerator_tempInput : MonoBehaviour {
 				BreadCrumbsObject currentBreadCrumbObject = currentCell.GetComponent<BreadCrumbsObject> ();
 				BreadCrumbsObject nextBreadCrumbObject;
 
-				startCell = currentCell;
+				startCell = mapCellArray.Cells[current];
 
 				currentBreadCrumbObject.visitTouched();
 
 				for (int orientation = 0; orientation < 4; orientation++) { // 0 = right, 1 = down, 2 = left, 3 = up
+//					Debug.Log("startpos:" + current + " orientation:" + orientation);
 					// variable decalarations:
-					Type currentType = currentCell.GetComponent<TypeObject>().To;
+					Type currentType;
 					Type nextType;
 
+					currentCell = mapCellArray.Cells[current];
+					currentType = currentCell.GetComponent<TypeObject>().To;
+					currentBreadCrumbObject = currentCell.GetComponent<BreadCrumbsObject> ();
 					currentBreadCrumbObject.visitOrientation (orientation);
 
-					if (currentType.Value == (int)Type.ValueEnum.Teleporter) {
-						nextCell = mapCellArray.Cells[currentCell.GetComponent<Teleporter> ().Teleposition];
-					} else {
-						nextCell = currentCell.GetComponent<NextPositionObject> ().Orientation [orientation].GetComponent<NextPosition> ().nextObject;
-					}
+//					// what to do when starting on top of a teleporter
+//					if (currentType.Value == (int)Type.ValueEnum.Teleporter) {
+//						nextCell = mapCellArray.Cells[currentCell.GetComponent<Teleporter> ().Teleposition];
+//					} else {
+//						nextCell = currentCell.GetComponent<NextPositionObject> ().Orientation [orientation].GetComponent<NextPosition> ().nextObject;
+//					}
+					nextCell = currentCell.GetComponent<NextPositionObject> ().Orientation [orientation].GetComponent<NextPosition> ().nextObject;
 					nextNextCell = nextCell.GetComponent<NextPositionObject> ().Orientation[orientation].GetComponent<NextPosition> ().nextObject;
 					nextType = nextCell.GetComponent<TypeObject>().To;
 
 					CanTestStart = false;
-					// iterating steps
 
 					while (currentCell != nextCell) {
-						
 						currentType = currentCell.GetComponent<TypeObject>().To;
+						currentBreadCrumbObject = currentCell.GetComponent<BreadCrumbsObject> ();
+						currentBreadCrumbObject.visitOrientation(orientation);
+
+						goingIntoTeleporter = false;
+						if (currentType.Value == (int)Type.ValueEnum.Teleporter) {
+							if (currentCell != startCell){
+								goingIntoTeleporter = true;
+
+								currentBreadCrumbObject.unVisitOrientation(orientation);
+								currentCell = mapCellArray.Cells [currentCell.GetComponent<Teleporter> ().Teleposition];
+								currentType = currentCell.GetComponent<TypeObject>().To;
+								nextCell = currentCell.GetComponent<NextPositionObject> ().Orientation [orientation].GetComponent<NextPosition> ().nextObject;
+	//							nextBreadCrumbObject = nextCell.GetComponent<BreadCrumbsObject> ();
+							}
+						}
+
 						nextType = nextCell.GetComponent<TypeObject>().To;
 						currentBreadCrumbObject = currentCell.GetComponent<BreadCrumbsObject> ();
 						nextBreadCrumbObject = nextCell.GetComponent<BreadCrumbsObject> ();
+
+//						Debug.Log ("I'm at:" + currentCell.GetComponent<ThisPosition> ().position);
 
 						if (currentCell == startCell && CanTestStart) {
 							break;
 						}
 						CanTestStart = true;
 
-						currentBreadCrumbObject.visitOrientation(orientation);
-						inc++;
-						goingIntoTeleporter = false;
 
-						if (currentType.Value == (int)Type.ValueEnum.Teleporter) {
-							goingIntoTeleporter = true;
-							currentBreadCrumbObject.unVisitOrientation(orientation);
-						}
+						inc++;
+
+
 						if (nextBreadCrumbObject.isVisitedOrientation(orientation)) {
 							break;
 						}
+
 						// colliding with types
 						if (nextType.Value == (int)Type.ValueEnum.Clingy) {
 							if (!currentCell.GetComponent<UsedAsStartPosition> ().used) {
@@ -134,10 +170,13 @@ public class LevelGenerator_tempInput : MonoBehaviour {
 								break;
 							}
 						}
+
 						// add types
 						if (!nextBreadCrumbObject.isVisitedTouched()) {
 							if (nextType.Value == (int)Type.ValueEnum.Empty){
 								// add block?
+								seedCounter++;
+								Random.seed = seedCounter;
 								if (Random.value>0.85f){
 									nextType.SetValue((int)Type.ValueEnum.Block);
 									startPositions.NewPositions.Add (currentCell.GetComponent<ThisPosition> ().position);
@@ -145,11 +184,13 @@ public class LevelGenerator_tempInput : MonoBehaviour {
 									break;
 								}
 								// add oneway?
+								seedCounter++;
+								Random.seed = seedCounter;
 								if (Random.value>0.85f){
 									if (nextNextCell != nextCell) { // are we at edge?
 										if (nextNextCell.GetComponent<TypeObject> ().To.Value == (int)Type.ValueEnum.Empty) { // need to have one free space infront
 											if (!currentCell.GetComponent<UsedAsStartPosition> ().used) {
-												//nextNextCell.GetComponent<BreadCrumbsObject> ().Touched.GetComponent<Touched> ().Visit();
+												nextNextCell.GetComponent<BreadCrumbsObject> ().Touched.GetComponent<Touched> ().Visit();
 												nextType.SetValue ((int)Type.ValueEnum.Oneway);
 												nextCell.GetComponent<Orientation> ().SetOrientation (orientation);
 											}
@@ -157,6 +198,8 @@ public class LevelGenerator_tempInput : MonoBehaviour {
 									}
 								}
 								// add clingy?
+								seedCounter++;
+								Random.seed = seedCounter;
 								if (Random.value > 0.98f) {
 									nextType.SetValue((int)Type.ValueEnum.Clingy);
 									startPositions.NewPositions.Add (nextCell.GetComponent<ThisPosition> ().position);
@@ -165,11 +208,18 @@ public class LevelGenerator_tempInput : MonoBehaviour {
 									break;
 								}
 								// add teleporter?
-								if (Random.value > 0.99f) {
+								seedCounter++;
+								Random.seed = seedCounter;
+								if (Random.value > 0.98f) {
 									if (!goingIntoTeleporter) {
-										temporaryTeleporterPosition = mapCellArray.GetValidTeleporterRandom (nextCell.GetComponent<ThisPosition>().position);
+										seedCounter++;
+										Random.seed = seedCounter;
+										temporaryTeleporterPosition = mapCellArray.GetValidTeleporterRandom (nextCell.GetComponent<ThisPosition>().position, seedCounter);
 										if (temporaryTeleporterPosition != -1) {
+											teleporterCount++;
 											nextType.SetValue ((int)Type.ValueEnum.Teleporter);
+											nextCell.GetComponent<CounterObject> ().teleporters.setValue (teleporterCount);
+											mapCellArray.Cells [temporaryTeleporterPosition].GetComponent<CounterObject>().teleporters.setValue (teleporterCount);
 											mapCellArray.Cells [temporaryTeleporterPosition].GetComponent<TypeObject> ().To.SetValue ((int)Type.ValueEnum.Teleporter);
 											nextCell.GetComponent<Teleporter> ().Teleposition = temporaryTeleporterPosition;
 											mapCellArray.Cells [temporaryTeleporterPosition].GetComponent<Teleporter> ().Teleposition = nextCell.GetComponent<ThisPosition> ().position;
@@ -181,26 +231,32 @@ public class LevelGenerator_tempInput : MonoBehaviour {
 						}
 
 						nextBreadCrumbObject.visitTouched ();
-						if (nextType.Value != (int)Type.ValueEnum.Teleporter) {
-							currentBreadCrumbObject.visitOrientation(orientation);
-						}
+//						if (nextType.Value != (int)Type.ValueEnum.Teleporter) {
+//							currentBreadCrumbObject.visitOrientation(orientation);
+//						}
 
 						if (steps < nextCell.GetComponent<CounterObject> ().steps.getValue () || nextCell.GetComponent<CounterObject> ().steps.getValue () == 0) {
-							nextCell.GetComponent<CounterObject> ().steps.setValue (steps);
+							if (nextType.Value == (int)Type.ValueEnum.Empty) {
+								nextCell.GetComponent<CounterObject> ().steps.setValue (steps);
+							}
 						}
 
 						currentCell = nextCell;
 //						if (currentCell == startCell){
 //							break;
 //						}
-						if (currentType.Value == (int)Type.ValueEnum.Teleporter && !goingIntoTeleporter) {
-							nextCell = mapCellArray.Cells [currentCell.GetComponent<Teleporter> ().Teleposition];
-						} else {
-							nextCell = nextCell.GetComponent<NextPositionObject> ().Orientation [orientation].GetComponent<NextPosition> ().nextObject;
-						}
+						nextCell = nextCell.GetComponent<NextPositionObject> ().Orientation [orientation].GetComponent<NextPosition> ().nextObject;
+//						Debug.Log("before checking teleporter");
+//						if (currentType.Value == (int)Type.ValueEnum.Teleporter && !goingIntoTeleporter) {
+//							nextCell = mapCellArray.Cells [currentCell.GetComponent<Teleporter> ().Teleposition];
+//							Debug.Log ("nextcCell:" + nextCell.GetComponent<ThisPosition> ().position);
+//							Debug.Log ("We are now teleporting!! to index:" + nextCell.GetComponent<ThisPosition>().position );
+//						} else {
+//							nextCell = nextCell.GetComponent<NextPositionObject> ().Orientation [orientation].GetComponent<NextPosition> ().nextObject;
+//						}
 //						nextCell = nextNextCell;
 						nextNextCell = nextCell.GetComponent<NextPositionObject> ().Orientation[orientation].GetComponent<NextPosition> ().nextObject;
-						//yield return new WaitForSeconds (0.08f);
+						yield return new WaitForSeconds (0.082f/Mathf.Clamp(buildSpeed,0.08f,100));
 					}
 					if (currentCell == nextCell) {
 						if (!currentCell.GetComponent<UsedAsStartPosition> ().used) {

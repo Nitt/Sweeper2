@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class CounterObject : MonoBehaviour {
-	public Counter steps, difficulty;
+	public Counter steps, difficulty, teleporters;
 	// Use this for initialization
 	void Start () {
 	
