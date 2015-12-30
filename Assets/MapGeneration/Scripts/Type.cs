@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class Type : MonoBehaviour {
-	public enum ValueEnum{Block,Clingy,Empty,Goal,Oneway,Start,Teleporter};
+	public enum ValueEnum{Block,Clingy,Empty,Goal,Oneway,Start,Teleporter, Dead};
 	public int Value;
 	public GameObject Visual;
 	public Material[] Mats;
@@ -40,6 +40,10 @@ public class Type : MonoBehaviour {
 			break;
 		case ((int)ValueEnum.Goal):
 			transform.GetComponent<TextMesh>().text = "G";
+			Visual.GetComponent<Renderer> ().material = Mats [(int)NewValue];
+			break;
+		case ((int)ValueEnum.Dead):
+			transform.GetComponent<TextMesh>().text = "D";
 			Visual.GetComponent<Renderer> ().material = Mats [(int)NewValue];
 			break;
 		}

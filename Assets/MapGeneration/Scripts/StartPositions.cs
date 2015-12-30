@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class StartPositions : MonoBehaviour {
-	public List<int> CurrentPositions;
-	public List<int> NewPositions;
+	[HideInInspector]
+	public List<int> CurrentPositions, NewPositions, CurrentDifficulties, NewDifficulties;
 
 	public void copyNewToCurrent() {
 		CurrentPositions =  new List<int>(NewPositions);
+		CurrentDifficulties =  new List<int>(NewDifficulties);
 		NewPositions.Clear();
+		NewDifficulties.Clear();
 	}
 	// Use this for initialization
 	void Start () {

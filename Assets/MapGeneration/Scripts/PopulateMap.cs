@@ -11,17 +11,17 @@ public class PopulateMap : MonoBehaviour {
 
 	public void populate(int Width, int Height, bool looping){ // x:1, y:1
 		MapArray = transform.GetComponent<GameobjectArray>();
-		MapArray.Cells = new GameObject[Width*Height];
+		MapArray.cells = new GameObject[Width*Height];
 
         for (int x = 0; x < Width; x++){
 			for (int y = 0; y < Height; y++) {
-				MapArray.Cells [(y + (x * Height))] = (GameObject)Instantiate (MapArray.Cell, new Vector3 (x, y, 0), Quaternion.identity);
-				MapArray.Cells [(y + (x * Height))].transform.parent = transform;
-				MapArray.Cells [(y + (x * Height))].transform.name = "Cell_x:" + x as string + " y;" + y as string + " index:" + (y + (x * Height));
-				MapArray.Cells [(y + (x * Height))].GetComponent<ThisPosition> ().position = (y + (x * Height));
+				MapArray.cells [(y + (x * Height))] = (GameObject)Instantiate (MapArray.cellPrefab, new Vector3 (x, y, 0), Quaternion.identity);
+				MapArray.cells [(y + (x * Height))].transform.parent = transform;
+				MapArray.cells [(y + (x * Height))].transform.name = "Cell_x:" + x as string + " y;" + y as string + " index:" + (y + (x * Height));
+				MapArray.cells [(y + (x * Height))].GetComponent<ThisPosition> ().position = (y + (x * Height));
 				// Right
 				for (int orientation = 0; orientation < 4; orientation++) { // 0 = right, 1 = down, 2 = left, 3 = up
-					NextPos = MapArray.Cells [(y + (x * Height))].GetComponent<NextPositionObject> ().Orientation[orientation].GetComponent<NextPosition> ();
+					NextPos = MapArray.cells [(y + (x * Height))].GetComponent<NextPositionObject> ().Orientation[orientation].GetComponent<NextPosition> ();
 					switch (orientation) {
 					case((int)Orientation.ValueEnum.Right):
 						NextPos.nextY = y;
@@ -78,8 +78,8 @@ public class PopulateMap : MonoBehaviour {
 		for (int x = 0; x < Width; x++) {
 			for (int y = 0; y < Height; y++) {
 				for (int orientation = 0; orientation < 4; orientation++) { // 0 = right, 1 = down, 2 = left, 3 = up
-					NextPos = MapArray.Cells [(y + (x * Height))].GetComponent<NextPositionObject>().Orientation[orientation].GetComponent<NextPosition> ();
-					NextPos.nextObject = MapArray.Cells [NextPos.nextY + Height * NextPos.nextX];
+					NextPos = MapArray.cells [(y + (x * Height))].GetComponent<NextPositionObject>().Orientation[orientation].GetComponent<NextPosition> ();
+					NextPos.nextObject = MapArray.cells [NextPos.nextY + Height * NextPos.nextX];
 				}
 			}
 		}

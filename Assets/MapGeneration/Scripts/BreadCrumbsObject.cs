@@ -5,6 +5,13 @@ public class BreadCrumbsObject : MonoBehaviour {
 	public GameObject Touched;
 	public GameObject[] Orientation;
 
+	public void Reset(){
+		for (int i = 0; i < 4; i++) {
+			Orientation[i].GetComponent<Touched>().UnVisit();
+			Touched.GetComponent<Touched> ().UnVisit();
+		}
+	}
+
 	public void visitTouched(){
 		Touched.GetComponent<Touched>().Visit();
 	}
